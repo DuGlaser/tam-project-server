@@ -13,3 +13,6 @@ resolver:
   filename: resolver.go
   type: Resolver
 autobind: []
+models:
+  Todo:
+    model: github.com/DuGlaser/tam-project-server.Todo
