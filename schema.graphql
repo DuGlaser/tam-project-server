@@ -13,10 +13,6 @@ type Query{
 }
 
 type Mutation{
-  postMessage(input: NewMessage!): Message!
+  postMessage(text: String!,roomName: String!): Message!
 }
 
-input NewMessage{
-  text: String!
-  roomName: String!
-}

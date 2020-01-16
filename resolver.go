@@ -6,11 +6,29 @@ import (
 
 type Resolver struct{}
 
+func (r *Resolver) Chatroom() ChatroomResolver {
+	return &chatroomResolver{r}
+}
+func (r *Resolver) Message() MessageResolver {
+	return &messageResolver{r}
+}
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
+}
+
+type chatroomResolver struct{ *Resolver }
+
+func (r *chatroomResolver) Message(ctx context.Context, obj *Chatroom) ([]*Message, error) {
+	panic("not implemented")
+}
+
+type messageResolver struct{ *Resolver }
+
+func (r *messageResolver) Text(ctx context.Context, obj *Message) (string, error) {
+	panic("not implemented")
 }
 
 type mutationResolver struct{ *Resolver }
