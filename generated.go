@@ -12,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/DuGlaser/tam-project-server/models"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -64,16 +65,16 @@ type ComplexityRoot struct {
 }
 
 type ChatroomResolver interface {
-	Message(ctx context.Context, obj *Chatroom) ([]*Message, error)
+	Message(ctx context.Context, obj *models.Chatroom) ([]*models.Message, error)
 }
 type MessageResolver interface {
-	Text(ctx context.Context, obj *Message) (string, error)
+	Text(ctx context.Context, obj *models.Message) (string, error)
 }
 type MutationResolver interface {
-	PostMessage(ctx context.Context, text string, roomName string) (*Message, error)
+	PostMessage(ctx context.Context, text string, roomName string) (*models.Message, error)
 }
 type QueryResolver interface {
-	Room(ctx context.Context, name string) (*Chatroom, error)
+	Room(ctx context.Context, name string) (*models.Chatroom, error)
 }
 
 type executableSchema struct {
@@ -316,7 +317,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.CollectedField, obj *Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.CollectedField, obj *models.Chatroom) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -353,7 +354,7 @@ func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql.CollectedField, obj *Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql.CollectedField, obj *models.Chatroom) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -384,13 +385,13 @@ func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Message)
+	res := resTmp.([]*models.Message)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessageᚄ(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessageᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *Message) (ret graphql.Marshaler) {
+func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *models.Message) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -427,7 +428,7 @@ func (ec *executionContext) _Message_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNID2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Message_text(ctx context.Context, field graphql.CollectedField, obj *Message) (ret graphql.Marshaler) {
+func (ec *executionContext) _Message_text(ctx context.Context, field graphql.CollectedField, obj *models.Message) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -502,10 +503,10 @@ func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*Message)
+	res := resTmp.(*models.Message)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_room(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -543,10 +544,10 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Chatroom)
+	res := resTmp.(*models.Chatroom)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐChatroom(ctx, field.Selections, res)
+	return ec.marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1785,7 +1786,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 var chatroomImplementors = []string{"Chatroom"}
 
-func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet, obj *Chatroom) graphql.Marshaler {
+func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet, obj *models.Chatroom) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, chatroomImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -1826,7 +1827,7 @@ func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet,
 
 var messageImplementors = []string{"Message"}
 
-func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *Message) graphql.Marshaler {
+func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *models.Message) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, messageImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2210,11 +2211,11 @@ func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.Selectio
 	return res
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx context.Context, sel ast.SelectionSet, v models.Message) graphql.Marshaler {
 	return ec._Message(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Message) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2238,7 +2239,7 @@ func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtam�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessage(ctx, sel, v[i])
+			ret[i] = ec.marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2251,7 +2252,7 @@ func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋDuGlaserᚋtam�
 	return ret
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx context.Context, sel ast.SelectionSet, v *models.Message) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2524,11 +2525,11 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOChatroom2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐChatroom(ctx context.Context, sel ast.SelectionSet, v Chatroom) graphql.Marshaler {
+func (ec *executionContext) marshalOChatroom2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v models.Chatroom) graphql.Marshaler {
 	return ec._Chatroom(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚐChatroom(ctx context.Context, sel ast.SelectionSet, v *Chatroom) graphql.Marshaler {
+func (ec *executionContext) marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v *models.Chatroom) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

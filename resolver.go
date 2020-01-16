@@ -2,7 +2,11 @@ package tam_project_server
 
 import (
 	"context"
-) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+
+	"github.com/DuGlaser/tam-project-server/models"
+)
+
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct{}
 
@@ -21,24 +25,24 @@ func (r *Resolver) Query() QueryResolver {
 
 type chatroomResolver struct{ *Resolver }
 
-func (r *chatroomResolver) Message(ctx context.Context, obj *Chatroom) ([]*Message, error) {
+func (r *chatroomResolver) Message(ctx context.Context, obj *models.Chatroom) ([]*models.Message, error) {
 	panic("not implemented")
 }
 
 type messageResolver struct{ *Resolver }
 
-func (r *messageResolver) Text(ctx context.Context, obj *Message) (string, error) {
+func (r *messageResolver) Text(ctx context.Context, obj *models.Message) (string, error) {
 	panic("not implemented")
 }
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) PostMessage(ctx context.Context, text string, roomName string) (*Message, error) {
+func (r *mutationResolver) PostMessage(ctx context.Context, text string, roomName string) (*models.Message, error) {
 	panic("not implemented")
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error) {
+func (r *queryResolver) Room(ctx context.Context, name string) (*models.Chatroom, error) {
 	panic("not implemented")
 }

@@ -15,6 +15,6 @@ resolver:
 autobind: []
 models:
   Chatroom:
-    model: github.com/DuGlaser/tam-project-server.Chatroom
+    model: github.com/DuGlaser/tam-project-server/models.Chatroom
   Message:
-    model: github.com/DuGlaser/tam-project-server.Message
+    model: github.com/DuGlaser/tam-project-server/models.Message
