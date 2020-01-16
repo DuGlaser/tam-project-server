@@ -1,4 +1,4 @@
-package tam_project_server
+package models
 
 type Chatroom struct {
 	Name    string
