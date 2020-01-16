@@ -15,4 +15,4 @@ resolver:
 autobind: []
 models:
   Todo:
-    model: github.com/DuGlaser/tam-project-server.Todo
+    model: github.com/DuGlaser/tam-project-server.Chatroom

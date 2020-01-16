@@ -2,12 +2,17 @@
 
 package tam_project_server
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Chatroom struct {
+	Name    string     `json:"name"`
+	Message []*Message `json:"message"`
 }
 
-type User struct {
+type Message struct {
 	ID   string `json:"id"`
-	Name string `json:"name"`
+	Text string `json:"text"`
+}
+
+type NewMessage struct {
+	Text     string `json:"text"`
+	RoomName string `json:"roomName"`
 }
