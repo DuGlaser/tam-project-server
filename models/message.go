@@ -1,4 +1,4 @@
-package tam_project_server
+package models
 
 type Message struct {
 	ID   int
