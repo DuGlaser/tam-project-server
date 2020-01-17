@@ -26,23 +26,33 @@ func (r *Resolver) Query() QueryResolver {
 type chatroomResolver struct{ *Resolver }
 
 func (r *chatroomResolver) Message(ctx context.Context, obj *models.Chatroom) ([]*models.Message, error) {
-	panic("not implemented")
+	return []*models.Message{}, nil
 }
 
 type messageResolver struct{ *Resolver }
 
 func (r *messageResolver) Text(ctx context.Context, obj *models.Message) (string, error) {
-	panic("not implemented")
+	return obj.Text, nil
 }
 
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) PostMessage(ctx context.Context, text string, roomName string) (*models.Message, error) {
-	panic("not implemented")
+
+	message := &models.Message{
+		Text: text,
+		ID:   1, /*TODO:randomなintの数*/
+	}
+	_ = models.Chatroom{
+		Name:    roomName,
+		Message: *message,
+	}
+
+	return message, nil
 }
 
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Room(ctx context.Context, name string) (*models.Chatroom, error) {
-	panic("not implemented")
+	return &models.Chatroom{}, nil
 }
