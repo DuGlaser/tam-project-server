@@ -1,20 +1,21 @@
 type Chatroom {
   name: String!
-  message: [Message!]!
   id: ID!
+  message: [Message!]!
 }
 
 type Message {
+  chatroomID: ID!
   text: String!
-  id: ID!
 }
 
 type Query{
   room(name: String!): Chatroom!
-  rooms: Chatroom!
+  rooms: [Chatroom!]!
 }
 
 type Mutation{
-  postMessage(text: String!,roomName: String!): Message
+  postMessage(text: String!,chatroomID: ID!): Message
+  createRoom(name: String!): Chatroom
 }
 
