@@ -1,6 +1,8 @@
 package models
 
 type Message struct {
-	ID   int
-	Text string
+	ID         string
+	Text       string
+	ChatroomID string 
+	Chatroom   Chatroom
 }
