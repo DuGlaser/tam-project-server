@@ -20,30 +20,49 @@ func (r *Resolver) Query() QueryResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) PostMessage(ctx context.Context, text string, roomName string) (*models.Message, error) {
+func (r *mutationResolver) PostMessage(ctx context.Context, text string, chatroomID string) (*models.Message, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
 	message := &models.Message{
-		Text: text,
-		ID:   1, /*TODO:randomなintの数*/
+		Text:       text,
+		ChatroomID: chatroomID,
 	}
 
 	db.Create(message)
 
 	return message, nil
 }
+func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*models.Chatroom, error) {
+	db := detabase.FetchConnection()
+	defer db.Close()
+
+	chatroom := &models.Chatroom{
+		Name: name,
+	}
+
+	db.Create(chatroom)
+	return chatroom, nil
+}
 
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Room(ctx context.Context, name string) (*models.Chatroom, error) {
-	var chatroom *models.Chatroom
-	//TODO:DBと接続して情報を取得
-	return chatroom, nil
+	db := detabase.FetchConnection()
+	defer db.Close()
+
+	var chatroom models.Chatroom
+	db.Preload("Message").First(&chatroom, name)
+
+	return &chatroom, nil
 }
-func (r *queryResolver) Rooms(ctx context.Context) (*models.Chatroom, error) {
-	var chatroom *models.Chatroom
-	//TODO:DBと接続して情報を取得
+
+func (r *queryResolver) Rooms(ctx context.Context) ([]*models.Chatroom, error) {
+	db := detabase.FetchConnection()
+	defer db.Close()
+
+	var chatroom []*models.Chatroom
+	db.Preload("Message").First(&chatroom)
 
 	return chatroom, nil
 }
