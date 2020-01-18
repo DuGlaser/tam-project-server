@@ -12,9 +12,5 @@ model:
 resolver:
   filename: resolver.go
   type: Resolver
-autobind: []
-models:
-  Chatroom:
-    model: github.com/DuGlaser/tam-project-server/models.Chatroom
-  Message:
-    model: github.com/DuGlaser/tam-project-server/models.Message
+autobind: 
+  - github.com/DuGlaser/tam-project-server/models
