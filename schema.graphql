@@ -10,7 +10,7 @@ type Message {
 }
 
 type Query{
-  room(name: String!): Chatroom!
+  room(chatroomID: ID!): Chatroom!
   rooms: [Chatroom!]!
 }
 
