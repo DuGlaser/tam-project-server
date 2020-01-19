@@ -47,12 +47,12 @@ func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*models
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Room(ctx context.Context, name string) (*models.Chatroom, error) {
+func (r *queryResolver) Room(ctx context.Context, chatroomID string) (*models.Chatroom, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
 	var chatroom models.Chatroom
-	db.Preload("Message").First(&chatroom, name)
+	db.Preload("Message").Find(&chatroom, chatroomID)
 
 	return &chatroom, nil
 }
@@ -62,7 +62,7 @@ func (r *queryResolver) Rooms(ctx context.Context) ([]*models.Chatroom, error) {
 	defer db.Close()
 
 	var chatroom []*models.Chatroom
-	db.Preload("Message").First(&chatroom)
+	db.Preload("Message").Find(&chatroom)
 
 	return chatroom, nil
 }
