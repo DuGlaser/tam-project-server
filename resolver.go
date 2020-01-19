@@ -33,6 +33,7 @@ func (r *mutationResolver) PostMessage(ctx context.Context, text string, chatroo
 
 	return message, nil
 }
+
 func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*models.Chatroom, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()

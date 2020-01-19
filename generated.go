@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Room  func(childComplexity int, name string) int
+		Room  func(childComplexity int, chatroomID string) int
 		Rooms func(childComplexity int) int
 	}
 }
@@ -70,7 +70,7 @@ type MutationResolver interface {
 	CreateRoom(ctx context.Context, name string) (*models.Chatroom, error)
 }
 type QueryResolver interface {
-	Room(ctx context.Context, name string) (*models.Chatroom, error)
+	Room(ctx context.Context, chatroomID string) (*models.Chatroom, error)
 	Rooms(ctx context.Context) ([]*models.Chatroom, error)
 }
 
@@ -158,7 +158,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.Room(childComplexity, args["chatroomID"].(string)), true
 
 	case "Query.rooms":
 		if e.complexity.Query.Rooms == nil {
@@ -241,7 +241,7 @@ type Message {
 }
 
 type Query{
-  room(name: String!): Chatroom!
+  room(chatroomID: ID!): Chatroom!
   rooms: [Chatroom!]!
 }
 
@@ -311,13 +311,13 @@ func (ec *executionContext) field_Query_room_args(ctx context.Context, rawArgs m
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	if tmp, ok := rawArgs["chatroomID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
+	args["chatroomID"] = arg0
 	return args, nil
 }
 
@@ -650,7 +650,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Room(rctx, args["name"].(string))
+		return ec.resolvers.Query().Room(rctx, args["chatroomID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
