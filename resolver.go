@@ -20,50 +20,48 @@ func (r *Resolver) Query() QueryResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) PostMessage(ctx context.Context, text string, chatroomID string) (*models.Message, error) {
+func (r *mutationResolver) CreateNote(ctx context.Context, title string) (*models.Note, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
-	message := &models.Message{
-		Text:       text,
-		ChatroomID: chatroomID,
+	note := &models.Note{
+		Title: title,
 	}
 
-	db.Create(message)
+	db.Create(note)
 
-	return message, nil
+	return note, nil
 }
-
-func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*models.Chatroom, error) {
+func (r *mutationResolver) UpdateNote(ctx context.Context, id string, content string) (*models.Note, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
-	chatroom := &models.Chatroom{
-		Name: name,
-	}
+	note := models.Note{ID: id}
+	db.First(&note)
 
-	db.Create(chatroom)
-	return chatroom, nil
+	note.Content = content
+	db.Model(&models.Note{}).Update(&note)
+	return &note, nil
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Room(ctx context.Context, chatroomID string) (*models.Chatroom, error) {
+func (r *queryResolver) Note(ctx context.Context, id string) (*models.Note, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
-	var chatroom models.Chatroom
-	db.Preload("Message").Find(&chatroom, chatroomID)
+	var note models.Note
+	db.Preload("Message").Find(&note, id)
 
-	return &chatroom, nil
+	return &note, nil
 }
 
-func (r *queryResolver) Rooms(ctx context.Context) ([]*models.Chatroom, error) {
+func (r *queryResolver) Notes(ctx context.Context) ([]*models.Note, error) {
 	db := detabase.FetchConnection()
 	defer db.Close()
 
-	var chatroom []*models.Chatroom
-	db.Preload("Message").Find(&chatroom)
+	var note []*models.Note
+	db.Preload("Message").Find(&note)
 
-	return chatroom, nil
+	return note, nil
 }
