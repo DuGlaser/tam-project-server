@@ -15,7 +15,5 @@ resolver:
 autobind: 
   - github.com/DuGlaser/tam-project-server/models
 models:
-  Chatroom:
-    model: models.Chatroom
-  Message:
-    model: models.Message
+  Note:
+    model: models.Note
