@@ -43,35 +43,30 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Chatroom struct {
-		ID      func(childComplexity int) int
-		Message func(childComplexity int) int
-		Name    func(childComplexity int) int
-	}
-
-	Message struct {
-		ChatroomID func(childComplexity int) int
-		Text       func(childComplexity int) int
-	}
-
 	Mutation struct {
-		CreateRoom  func(childComplexity int, name string) int
-		PostMessage func(childComplexity int, text string, chatroomID string) int
+		CreateNote func(childComplexity int, title string) int
+		UpdateNote func(childComplexity int, id string, content string) int
+	}
+
+	Note struct {
+		Content func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Title   func(childComplexity int) int
 	}
 
 	Query struct {
-		Room  func(childComplexity int, chatroomID string) int
-		Rooms func(childComplexity int) int
+		Note  func(childComplexity int, id string) int
+		Notes func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	PostMessage(ctx context.Context, text string, chatroomID string) (*models.Message, error)
-	CreateRoom(ctx context.Context, name string) (*models.Chatroom, error)
+	CreateNote(ctx context.Context, title string) (*models.Note, error)
+	UpdateNote(ctx context.Context, id string, content string) (*models.Note, error)
 }
 type QueryResolver interface {
-	Room(ctx context.Context, chatroomID string) (*models.Chatroom, error)
-	Rooms(ctx context.Context) ([]*models.Chatroom, error)
+	Note(ctx context.Context, id string) (*models.Note, error)
+	Notes(ctx context.Context) ([]*models.Note, error)
 }
 
 type executableSchema struct {
@@ -89,83 +84,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Chatroom.id":
-		if e.complexity.Chatroom.ID == nil {
+	case "Mutation.createNote":
+		if e.complexity.Mutation.CreateNote == nil {
 			break
 		}
 
-		return e.complexity.Chatroom.ID(childComplexity), true
-
-	case "Chatroom.message":
-		if e.complexity.Chatroom.Message == nil {
-			break
-		}
-
-		return e.complexity.Chatroom.Message(childComplexity), true
-
-	case "Chatroom.name":
-		if e.complexity.Chatroom.Name == nil {
-			break
-		}
-
-		return e.complexity.Chatroom.Name(childComplexity), true
-
-	case "Message.chatroomID":
-		if e.complexity.Message.ChatroomID == nil {
-			break
-		}
-
-		return e.complexity.Message.ChatroomID(childComplexity), true
-
-	case "Message.text":
-		if e.complexity.Message.Text == nil {
-			break
-		}
-
-		return e.complexity.Message.Text(childComplexity), true
-
-	case "Mutation.createRoom":
-		if e.complexity.Mutation.CreateRoom == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createRoom_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createNote_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRoom(childComplexity, args["name"].(string)), true
+		return e.complexity.Mutation.CreateNote(childComplexity, args["title"].(string)), true
 
-	case "Mutation.postMessage":
-		if e.complexity.Mutation.PostMessage == nil {
+	case "Mutation.updateNote":
+		if e.complexity.Mutation.UpdateNote == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_postMessage_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateNote_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PostMessage(childComplexity, args["text"].(string), args["chatroomID"].(string)), true
+		return e.complexity.Mutation.UpdateNote(childComplexity, args["id"].(string), args["content"].(string)), true
 
-	case "Query.room":
-		if e.complexity.Query.Room == nil {
+	case "Note.content":
+		if e.complexity.Note.Content == nil {
 			break
 		}
 
-		args, err := ec.field_Query_room_args(context.TODO(), rawArgs)
+		return e.complexity.Note.Content(childComplexity), true
+
+	case "Note.id":
+		if e.complexity.Note.ID == nil {
+			break
+		}
+
+		return e.complexity.Note.ID(childComplexity), true
+
+	case "Note.title":
+		if e.complexity.Note.Title == nil {
+			break
+		}
+
+		return e.complexity.Note.Title(childComplexity), true
+
+	case "Query.note":
+		if e.complexity.Query.Note == nil {
+			break
+		}
+
+		args, err := ec.field_Query_note_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Room(childComplexity, args["chatroomID"].(string)), true
+		return e.complexity.Query.Note(childComplexity, args["id"].(string)), true
 
-	case "Query.rooms":
-		if e.complexity.Query.Rooms == nil {
+	case "Query.notes":
+		if e.complexity.Query.Notes == nil {
 			break
 		}
 
-		return e.complexity.Query.Rooms(childComplexity), true
+		return e.complexity.Query.Notes(childComplexity), true
 
 	}
 	return 0, false
@@ -229,27 +210,21 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Chatroom {
-  name: String!
+	&ast.Source{Name: "schema.graphql", Input: `type Note {
   id: ID!
-  message: [Message!]!
-}
-
-type Message {
-  chatroomID: ID!
-  text: String!
+  title: String!
+  content: String!
 }
 
 type Query{
-  room(chatroomID: ID!): Chatroom!
-  rooms: [Chatroom!]!
+  note(id: ID!): Note!
+  notes: [Note!]!
 }
 
 type Mutation{
-  postMessage(text: String!,chatroomID: ID!): Message
-  createRoom(name: String!): Chatroom
+  createNote(title: String!):Note 
+  updateNote(id: ID!,content: String!):Note
 }
-
 `},
 )
 
@@ -257,39 +232,39 @@ type Mutation{
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createRoom_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := rawArgs["title"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
+	args["title"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_postMessage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateNote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["text"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["text"] = arg0
+	args["id"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["chatroomID"]; ok {
-		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+	if tmp, ok := rawArgs["content"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["chatroomID"] = arg1
+	args["content"] = arg1
 	return args, nil
 }
 
@@ -307,17 +282,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_room_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_note_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["chatroomID"]; ok {
+	if tmp, ok := rawArgs["id"]; ok {
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["chatroomID"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -357,7 +332,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.CollectedField, obj *models.Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -367,34 +342,38 @@ func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.Co
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Chatroom",
+		Object:   "Mutation",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createNote_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return ec.resolvers.Mutation().CreateNote(rctx, args["title"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*models.Note)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalONote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Chatroom_id(ctx context.Context, field graphql.CollectedField, obj *models.Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_updateNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -404,7 +383,48 @@ func (ec *executionContext) _Chatroom_id(ctx context.Context, field graphql.Coll
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Chatroom",
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateNote_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateNote(rctx, args["id"].(string), args["content"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.Note)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalONote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Note_id(ctx context.Context, field graphql.CollectedField, obj *models.Note) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Note",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -431,7 +451,7 @@ func (ec *executionContext) _Chatroom_id(ctx context.Context, field graphql.Coll
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql.CollectedField, obj *models.Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Note_title(ctx context.Context, field graphql.CollectedField, obj *models.Note) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -441,7 +461,7 @@ func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Chatroom",
+		Object:   "Note",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -450,81 +470,7 @@ func (ec *executionContext) _Chatroom_message(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]models.Message)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMessage2ᚕgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessageᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Message_chatroomID(ctx context.Context, field graphql.CollectedField, obj *models.Message) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Message",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ChatroomID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Message_text(ctx context.Context, field graphql.CollectedField, obj *models.Message) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Message",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
+		return obj.Title, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -542,7 +488,7 @@ func (ec *executionContext) _Message_text(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Note_content(ctx context.Context, field graphql.CollectedField, obj *models.Note) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -552,79 +498,34 @@ func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field gra
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
+		Object:   "Note",
 		Field:    field,
 		Args:     nil,
-		IsMethod: true,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_postMessage_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PostMessage(rctx, args["text"].(string), args["chatroomID"].(string))
+		return obj.Content, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.Message)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_createRoom(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
 		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createRoom_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateRoom(rctx, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.Chatroom)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_room(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_note(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -641,7 +542,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_room_args(ctx, rawArgs)
+	args, err := ec.field_Query_note_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -650,7 +551,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Room(rctx, args["chatroomID"].(string))
+		return ec.resolvers.Query().Note(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -662,13 +563,13 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Chatroom)
+	res := resTmp.(*models.Note)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx, field.Selections, res)
+	return ec.marshalNNote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_rooms(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_notes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -687,7 +588,7 @@ func (ec *executionContext) _Query_rooms(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Rooms(rctx)
+		return ec.resolvers.Query().Notes(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -699,10 +600,10 @@ func (ec *executionContext) _Query_rooms(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*models.Chatroom)
+	res := resTmp.([]*models.Note)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNChatroom2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroomᚄ(ctx, field.Selections, res)
+	return ec.marshalNNote2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNoteᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1939,75 +1840,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** object.gotpl ****************************
 
-var chatroomImplementors = []string{"Chatroom"}
-
-func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet, obj *models.Chatroom) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, chatroomImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Chatroom")
-		case "name":
-			out.Values[i] = ec._Chatroom_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._Chatroom_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "message":
-			out.Values[i] = ec._Chatroom_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var messageImplementors = []string{"Message"}
-
-func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *models.Message) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, messageImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Message")
-		case "chatroomID":
-			out.Values[i] = ec._Message_chatroomID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "text":
-			out.Values[i] = ec._Message_text(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2023,10 +1855,47 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "postMessage":
-			out.Values[i] = ec._Mutation_postMessage(ctx, field)
-		case "createRoom":
-			out.Values[i] = ec._Mutation_createRoom(ctx, field)
+		case "createNote":
+			out.Values[i] = ec._Mutation_createNote(ctx, field)
+		case "updateNote":
+			out.Values[i] = ec._Mutation_updateNote(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var noteImplementors = []string{"Note"}
+
+func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj *models.Note) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, noteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Note")
+		case "id":
+			out.Values[i] = ec._Note_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Note_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "content":
+			out.Values[i] = ec._Note_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2053,7 +1922,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "room":
+		case "note":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2061,13 +1930,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_room(ctx, field)
+				res = ec._Query_note(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "rooms":
+		case "notes":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2075,7 +1944,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_rooms(ctx, field)
+				res = ec._Query_notes(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2355,57 +2224,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNChatroom2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v models.Chatroom) graphql.Marshaler {
-	return ec._Chatroom(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNChatroom2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroomᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Chatroom) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v *models.Chatroom) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Chatroom(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
@@ -2420,11 +2238,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx context.Context, sel ast.SelectionSet, v models.Message) graphql.Marshaler {
-	return ec._Message(ctx, sel, &v)
+func (ec *executionContext) marshalNNote2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx context.Context, sel ast.SelectionSet, v models.Note) graphql.Marshaler {
+	return ec._Note(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚕgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNNote2ᚕᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNoteᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Note) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2448,7 +2266,7 @@ func (ec *executionContext) marshalNMessage2ᚕgithubᚗcomᚋDuGlaserᚋtamᚑp
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMessage2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx, sel, v[i])
+			ret[i] = ec.marshalNNote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2459,6 +2277,16 @@ func (ec *executionContext) marshalNMessage2ᚕgithubᚗcomᚋDuGlaserᚋtamᚑp
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNNote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx context.Context, sel ast.SelectionSet, v *models.Note) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Note(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2724,26 +2552,15 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOChatroom2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v models.Chatroom) graphql.Marshaler {
-	return ec._Chatroom(ctx, sel, &v)
+func (ec *executionContext) marshalONote2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx context.Context, sel ast.SelectionSet, v models.Note) graphql.Marshaler {
+	return ec._Note(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOChatroom2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐChatroom(ctx context.Context, sel ast.SelectionSet, v *models.Chatroom) graphql.Marshaler {
+func (ec *executionContext) marshalONote2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐNote(ctx context.Context, sel ast.SelectionSet, v *models.Note) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Chatroom(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOMessage2githubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx context.Context, sel ast.SelectionSet, v models.Message) graphql.Marshaler {
-	return ec._Message(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋDuGlaserᚋtamᚑprojectᚑserverᚋmodelsᚐMessage(ctx context.Context, sel ast.SelectionSet, v *models.Message) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Message(ctx, sel, v)
+	return ec._Note(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
